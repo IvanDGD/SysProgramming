@@ -1,81 +1,56 @@
-﻿using System.Net.Sockets;
-
-class Bank
-{
-    private static int balance = 1000;
-    private static object locker = new object();
-
-    public void WithdrawMoney(int withdraw)
-    {
-        lock (locker)
-        {
-            if (withdraw <= balance)
-            {
-                Console.WriteLine($"From balance was withdraw {withdraw}$");
-                balance -= withdraw;
-            }
-            else
-            {
-                Console.WriteLine("Not enough money");
-            }
-        }
-    }
-}
+﻿using System.IO.Compression;
 
 class Program
 {
-    static object locker = new object();
-    static int sumResult = 0;
-    static double avgResult = 0;
-    static void Main()
+    static async Task Main(string[] args)
     {
-        #region Task
-        //Bank card1 = new Bank();
-        //Bank card2 = new Bank();
+        Console.WriteLine("Enter path to directory:");
+        string directoryPath = Console.ReadLine();
 
-        //card1.WithdrawMoney(500);
-        //card2.WithdrawMoney(750);
-        #endregion
-
-        #region additionalTask1
-        int[] arr = { 1, 51, 3, 15, 64, 9, 23, 47, 89, 75 };
-
-        Thread sumThread = new Thread(() => ArraySum(arr));
-        Thread avgThread = new Thread(() => ArrayAvg(arr));
-
-        sumThread.Start();
-        sumThread.Join();
-
-        avgThread.Start();
-        avgThread.Join();
-        #endregion
-    }
-
-    static void ArraySum(int[] array)
-    {
-        lock (locker)
+        if (!Directory.Exists(directoryPath))
         {
-            int sum = 0;
-            for (int i = 0; i < array.Length; i++)
-            {
-                sum += array[i];
-            }
-            sumResult = sum;
-            Console.WriteLine(sumResult);
+            Console.WriteLine("Directory not exist.");
+            return;
         }
+
+        string[] files = Directory.GetFiles(directoryPath);
+
+        Task[] compressionTasks = new Task[files.Length];
+        for (int i = 0; i < files.Length; i++)
+        {
+            string file = files[i];
+            compressionTasks[i] = CompressFileAsync(file);
+        }
+
+        await Task.WhenAll(compressionTasks);
+
+        Console.WriteLine("Compression end.");
     }
 
-    static void ArrayAvg(int[] array)
+    static async Task CompressFileAsync(string filePath)
     {
-        lock (locker)
+        string compressedFile = filePath + ".gz";
+
+        if (File.Exists(compressedFile))
         {
-            int sum = 0;
-            for (int i = 0; i < array.Length; i++)
+            Console.WriteLine($"File {Path.GetFileName(filePath)} compression already.");
+            return;
+        }
+
+        try
+        {
+            using (FileStream originalFileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (FileStream compressedFileStream = new FileStream(compressedFile, FileMode.Create))
+            using (GZipStream compressionStream = new GZipStream(compressedFileStream, CompressionMode.Compress))
             {
-                sum += array[i];
+                await originalFileStream.CopyToAsync(compressionStream);
             }
-            avgResult = (double)sum / array.Length;
-            Console.WriteLine(avgResult);
+
+            Console.WriteLine($"Compression: {Path.GetFileName(filePath)} → {Path.GetFileName(compressedFile)}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error with file {filePath}: {ex.Message}");
         }
     }
 }
