@@ -4,27 +4,44 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        Console.WriteLine("Enter path to directory:");
-        string directoryPath = Console.ReadLine();
+        #region GeneralTask
+        //Console.WriteLine("Enter path to directory:");
+        //string directoryPath = Console.ReadLine();
 
-        if (!Directory.Exists(directoryPath))
+        //if (!Directory.Exists(directoryPath))
+        //{
+        //    Console.WriteLine("Directory not exist.");
+        //    return;
+        //}
+
+        //string[] files = Directory.GetFiles(directoryPath);
+
+        //Task[] compressionTasks = new Task[files.Length];
+        //for (int i = 0; i < files.Length; i++)
+        //{
+        //    string file = files[i];
+        //    compressionTasks[i] = CompressFileAsync(file);
+        //}
+
+        //await Task.WhenAll(compressionTasks);
+
+        //Console.WriteLine("Compression end.");
+        #endregion
+        #region AdditionTask
+        using (HttpClient httpClient = new HttpClient())
         {
-            Console.WriteLine("Directory not exist.");
-            return;
+            string url = $"https://api.weatherapi.com/v1/current.json?key=accb029b1e9f4bbe98972252251309&q={city}";
+
+            Task<string> task = httpClient.GetStringAsync(url);
+
+            await Task.WhenAll(task);
+
+            string weatherTask = task.Result;
+
+            Console.WriteLine("WeatherAPI");
+            Console.WriteLine(weatherTask);
         }
-
-        string[] files = Directory.GetFiles(directoryPath);
-
-        Task[] compressionTasks = new Task[files.Length];
-        for (int i = 0; i < files.Length; i++)
-        {
-            string file = files[i];
-            compressionTasks[i] = CompressFileAsync(file);
-        }
-
-        await Task.WhenAll(compressionTasks);
-
-        Console.WriteLine("Compression end.");
+        #endregion
     }
 
     static async Task CompressFileAsync(string filePath)
