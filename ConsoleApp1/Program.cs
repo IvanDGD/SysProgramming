@@ -1,73 +1,36 @@
-﻿using System.IO.Compression;
+﻿using System;
+using System.Text;
 
 class Program
 {
-    static async Task Main(string[] args)
+    static unsafe void Main()
     {
-        #region GeneralTask
-        //Console.WriteLine("Enter path to directory:");
-        //string directoryPath = Console.ReadLine();
+        double value = 0;
+        byte* p = (byte*)&value;
 
-        //if (!Directory.Exists(directoryPath))
-        //{
-        //    Console.WriteLine("Directory not exist.");
-        //    return;
-        //}
+        p[0] = 1;
 
-        //string[] files = Directory.GetFiles(directoryPath);
+        char c = 'ƍ';
+        byte[] cBytes = BitConverter.GetBytes(c);
+        p[1] = cBytes[0];
+        p[2] = cBytes[1];
 
-        //Task[] compressionTasks = new Task[files.Length];
-        //for (int i = 0; i < files.Length; i++)
-        //{
-        //    string file = files[i];
-        //    compressionTasks[i] = CompressFileAsync(file);
-        //}
+        p[3] = (byte)'A';
 
-        //await Task.WhenAll(compressionTasks);
+        byte[] c2 = BitConverter.GetBytes('ƍ');
+        p[4] = c2[0];
 
-        //Console.WriteLine("Compression end.");
-        #endregion
-        #region AdditionTask
-        using (HttpClient httpClient = new HttpClient())
-        {
-            string url = $"https://api.weatherapi.com/v1/current.json?key=accb029b1e9f4bbe98972252251309&q={city}";
+        int num = 2;
+        byte[] intBytes = BitConverter.GetBytes(num);
+        for (int i = 0; i < 4; i++)
+            p[4 + i] = intBytes[i];
 
-            Task<string> task = httpClient.GetStringAsync(url);
+        p[7] = 3;
 
-            await Task.WhenAll(task);
+        Console.WriteLine("Double value: " + value);
 
-            string weatherTask = task.Result;
-
-            Console.WriteLine("WeatherAPI");
-            Console.WriteLine(weatherTask);
-        }
-        #endregion
-    }
-
-    static async Task CompressFileAsync(string filePath)
-    {
-        string compressedFile = filePath + ".gz";
-
-        if (File.Exists(compressedFile))
-        {
-            Console.WriteLine($"File {Path.GetFileName(filePath)} compression already.");
-            return;
-        }
-
-        try
-        {
-            using (FileStream originalFileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            using (FileStream compressedFileStream = new FileStream(compressedFile, FileMode.Create))
-            using (GZipStream compressionStream = new GZipStream(compressedFileStream, CompressionMode.Compress))
-            {
-                await originalFileStream.CopyToAsync(compressionStream);
-            }
-
-            Console.WriteLine($"Compression: {Path.GetFileName(filePath)} → {Path.GetFileName(compressedFile)}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error with file {filePath}: {ex.Message}");
-        }
+        Console.Write("Memory bytes: ");
+        for (int i = 0; i < sizeof(double); i++)
+            Console.Write(p[i] + " ");
     }
 }
