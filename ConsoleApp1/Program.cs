@@ -1,36 +1,102 @@
-﻿using System;
-using System.Text;
+﻿using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 class Program
 {
-    static unsafe void Main()
+    static readonly string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+    static readonly string archivePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs_archive.zip");
+    static readonly string errorLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ErrorLogs.txt");
+    static readonly object statsLock = new object();
+    static readonly Dictionary<string, int> logLinesCount = new Dictionary<string, int>();
+    static int totalErrors = 0;
+
+    static async Task Main()
     {
-        double value = 0;
-        byte* p = (byte*)&value;
+        Directory.CreateDirectory(logsDir);
+        List<Task> tasks = new List<Task>();
 
-        p[0] = 1;
+        for (int i = 1; i <= 5; i++)
+        {
+            string filePath = Path.Combine(logsDir, $"log{i}.txt");
+            logLinesCount[filePath] = 0;
+            tasks.Add(Task.Run(() => GenerateLogs(filePath)));
+        }
 
-        char c = 'ƍ';
-        byte[] cBytes = BitConverter.GetBytes(c);
-        p[1] = cBytes[0];
-        p[2] = cBytes[1];
+        Task archiver = Task.Run(() => ArchiveLogs());
+        Task analyzer = Task.Run(() => AnalyzeLogs());
 
-        p[3] = (byte)'A';
+        await Task.WhenAll(tasks);
+        await Task.Delay(12000);
 
-        byte[] c2 = BitConverter.GetBytes('ƍ');
-        p[4] = c2[0];
+        Console.WriteLine("\n=== Stats ===");
+        lock (statsLock)
+        {
+            foreach (var kv in logLinesCount)
+                Console.WriteLine($"{Path.GetFileName(kv.Key)}: {kv.Value} lines");
+            Console.WriteLine($"Errors/Warnings found: {totalErrors}");
+            if (File.Exists(archivePath))
+                Console.WriteLine($"Archive size: {new FileInfo(archivePath).Length} bytes");
+        }
+    }
 
-        int num = 2;
-        byte[] intBytes = BitConverter.GetBytes(num);
-        for (int i = 0; i < 4; i++)
-            p[4 + i] = intBytes[i];
 
-        p[7] = 3;
+    static async Task GenerateLogs(string filePath)
+    {
+        Random rnd = new Random();
+        for (int i = 0; i < 50; i++)
+        {
+            string message = $"[{DateTime.Now:HH:mm:ss}] Thread {Path.GetFileName(filePath)}: processing data";
+            if (rnd.Next(0, 100) < 10)
+                message += " Warning: simulated error";
+            lock (statsLock) logLinesCount[filePath]++;
+            await File.AppendAllTextAsync(filePath, message + Environment.NewLine);
+            await Task.Delay(rnd.Next(100, 300));
+        }
+    }
 
-        Console.WriteLine("Double value: " + value);
+    static async Task ArchiveLogs()
+    {
+        while (true)
+        {
+            foreach (string file in Directory.GetFiles(logsDir, "*.txt"))
+            {
+                if (new FileInfo(file).Length > 1024)
+                {
+                    using (var zip = new FileStream(archivePath, File.Exists(archivePath) ? FileMode.Open : FileMode.Create))
+                    using (var archive = new ZipArchive(zip, ZipArchiveMode.Update))
+                    {
+                        string entryName = Path.GetFileName(file);
+                        archive.CreateEntryFromFile(file, entryName, CompressionLevel.Optimal);
+                    }
+                    File.WriteAllText(file, string.Empty);
+                }
+            }
+            await Task.Delay(5000);
+        }
+    }
 
-        Console.Write("Memory bytes: ");
-        for (int i = 0; i < sizeof(double); i++)
-            Console.Write(p[i] + " ");
+    static async Task AnalyzeLogs()
+    {
+        Regex regex = new Regex(@"Ошибка|Warning|Exception", RegexOptions.IgnoreCase);
+        while (true)
+        {
+            foreach (string file in Directory.GetFiles(logsDir, "*.txt"))
+            {
+                string[] lines = File.ReadAllLines(file);
+                foreach (var line in lines)
+                {
+                    if (regex.IsMatch(line))
+                    {
+                        using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using (var reader = new StreamReader(stream))
+                        {
+                            string content = await reader.ReadToEndAsync();
+                        }
+
+                    }
+                }
+            }
+            await Task.Delay(10000);
+        }
     }
 }

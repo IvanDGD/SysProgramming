@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+
+		<PackageId>textstat</PackageId>
+		<Version>1.0.1</Version>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Company>Developers</Company>
+		<Authors>Reshetnik Ivan</Authors>
+		<Title>TextStat</Title>
+		<Description>TextStat - a library for text analysis: words, sentences, paragraphs, top words, reading time estimation, and export to JSON/CSV.</Description>
+		<RepositoryUrl>https://github.com/murzilaka2?tab=repositories</RepositoryUrl>
+	</PropertyGroup>
+
+</Project>
