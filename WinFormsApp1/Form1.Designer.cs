@@ -30,8 +30,7 @@
         {
             numericUpDown1 = new NumericUpDown();
             button1 = new Button();
-            textBox1 = new TextBox();
-            progressBar1 = new ProgressBar();
+            label1 = new Label();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             SuspendLayout();
             // 
@@ -48,31 +47,24 @@
             button1.Name = "button1";
             button1.Size = new Size(195, 29);
             button1.TabIndex = 1;
-            button1.Text = "Calculate Factorial";
+            button1.Text = "Change font size";
             button1.UseVisualStyleBackColor = true;
             // 
-            // textBox1
+            // label1
             // 
-            textBox1.Location = new Point(108, 123);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(195, 27);
-            textBox1.TabIndex = 2;
-            textBox1.Text = "Result";
-            // 
-            // progressBar1
-            // 
-            progressBar1.Location = new Point(108, 156);
-            progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(195, 29);
-            progressBar1.TabIndex = 3;
+            label1.AutoSize = true;
+            label1.Location = new Point(108, 120);
+            label1.Name = "label1";
+            label1.Size = new Size(65, 20);
+            label1.TabIndex = 2;
+            label1.Text = "Text size";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(422, 351);
-            Controls.Add(progressBar1);
-            Controls.Add(textBox1);
+            Controls.Add(label1);
             Controls.Add(button1);
             Controls.Add(numericUpDown1);
             Name = "Form1";
@@ -86,7 +78,6 @@
 
         private NumericUpDown numericUpDown1;
         private Button button1;
-        private TextBox textBox1;
-        private ProgressBar progressBar1;
+        private Label label1;
     }
 }

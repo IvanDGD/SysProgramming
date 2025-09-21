@@ -12,8 +12,6 @@ namespace WinFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             Form1 mainForm = new Form1();
-            Form2 extraForm = new Form2();
-            extraForm.Show();
             Application.Run(mainForm);
         }
     }
