@@ -3,30 +3,37 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-class Server
-{
+class ServerApp
+{ 
     static void Main()
     {
-        TcpListener listener = new TcpListener(IPAddress.Any, 5000);
+        TcpListener listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 5000);
         listener.Start();
-        Console.WriteLine("Server started");
-
-        TcpClient client = listener.AcceptTcpClient();
-        Console.WriteLine("Client accepted.");
-
-        NetworkStream stream = client.GetStream();
-        byte[] buffer = new byte[1024];
+        Console.WriteLine("Server started. Waiting for connections...");
 
         while (true)
         {
+            TcpClient client = listener.AcceptTcpClient();
+            NetworkStream stream = client.GetStream();
+
+            byte[] buffer = new byte[256];
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            if (bytesRead == 0) break;
+            string request = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
 
-            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            Console.WriteLine("Clients message: " + message);
+            Console.WriteLine($"Received request: {request}");
+
+            string response = request.ToLower() switch
+            {
+                "time" => DateTime.Now.ToString("HH:mm:ss"),
+                "date" => DateTime.Now.ToString("dd.MM.yyyy"),
+                _ => "Unknown command"
+            };
+
+            byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+            stream.Write(responseBytes, 0, responseBytes.Length);
+
+            client.Close();
+            Console.WriteLine("Connection closed.\n");
         }
-
-        client.Close();
-        listener.Stop();
     }
 }

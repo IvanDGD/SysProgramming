@@ -1,46 +1,26 @@
 ﻿using System;
-using System.Data;
-using System.Text.RegularExpressions;
+using System.Net.Sockets;
+using System.Text;
 
-class Program
+class ClientApp
 {
     static void Main()
     {
-        Console.WriteLine("Введите арифметическое выражение (или 'exit' для выхода):");
-        string input;
-        do
-        {
-            input = Console.ReadLine();
+        Console.WriteLine("Enter command (time or date):");
+        string command = Console.ReadLine();
 
-            if (input == "exit")
-                break;
+        TcpClient client = new TcpClient("127.0.0.1", 5000);
+        NetworkStream stream = client.GetStream();
 
-            string expr = Regex.Replace(input, @"Pow\(([^,]+),([^)]+)\)", match =>
-            {
-                double a = double.Parse(match.Groups[1].Value);
-                double b = double.Parse(match.Groups[2].Value);
-                return Math.Pow(a, b).ToString();
-            });
+        byte[] requestBytes = Encoding.UTF8.GetBytes(command);
+        stream.Write(requestBytes, 0, requestBytes.Length);
 
-            expr = Regex.Replace(expr, @"Max\(([^,]+),([^)]+)\)", match =>
-            {
-                double a = double.Parse(match.Groups[1].Value);
-                double b = double.Parse(match.Groups[2].Value);
-                return Math.Max(a, b).ToString();
-            });
+        byte[] buffer = new byte[256];
+        int bytesRead = stream.Read(buffer, 0, buffer.Length);
+        string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-            expr = Regex.Replace(expr, @"Min\(([^,]+),([^)]+)\)", match =>
-            {
-                double a = double.Parse(match.Groups[1].Value);
-                double b = double.Parse(match.Groups[2].Value);
-                return Math.Min(a, b).ToString();
-            });
+        Console.WriteLine($"Server response: {response}");
 
-            var result = new DataTable().Compute(expr, null);
-
-            Console.WriteLine("Результат: " + result);
-            Console.WriteLine("Введите арифметическое выражение (или 'exit' для выхода):");
-
-        } while (true);
+        client.Close();
     }
 }
