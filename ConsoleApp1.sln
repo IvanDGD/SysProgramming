@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextStat", "TextStat\TextSt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{AE4EF8A7-B4C8-45A3-B664-54FFBAA45E30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPServer", "ASPServer\ASPServer.csproj", "{FC1FC6D6-320F-43A8-B673-3B0B84B6CA4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{AE4EF8A7-B4C8-45A3-B664-54FFBAA45E30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE4EF8A7-B4C8-45A3-B664-54FFBAA45E30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE4EF8A7-B4C8-45A3-B664-54FFBAA45E30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC1FC6D6-320F-43A8-B673-3B0B84B6CA4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC1FC6D6-320F-43A8-B673-3B0B84B6CA4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC1FC6D6-320F-43A8-B673-3B0B84B6CA4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC1FC6D6-320F-43A8-B673-3B0B84B6CA4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

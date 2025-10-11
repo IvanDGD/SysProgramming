@@ -1,34 +1,33 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 class Program
 {
-    static async Task Main()
+    static void Main()
     {
-        string host = "127.0.0.1";
-        int port = 8888;
+        UdpClient client = new UdpClient();
+        IPEndPoint serverEP = new IPEndPoint(IPAddress.Loopback, 8888);
 
-        using TcpClient client = new TcpClient();
-        await client.ConnectAsync(host, port);
-        Console.WriteLine("Connected to currency server.");
-        Console.WriteLine("Type query: <FROM> <TO> (USD EUR). Type 'exit' to stop.");
-
-        var reader = new StreamReader(client.GetStream(), Encoding.UTF8);
-        var writer = new StreamWriter(client.GetStream(), Encoding.UTF8);
+        Console.WriteLine("Введите название комплектующей (или 'exit' для выхода):");
 
         while (true)
         {
-            Console.Write("> ");
-            string? input = Console.ReadLine();
-            if (input == null || input.ToLower() == "exit") break;
+            string message = Console.ReadLine();
+            if (message.ToLower() == "exit") break;
 
-            await writer.WriteLineAsync(input);
-            await writer.FlushAsync();
+            byte[] data = Encoding.UTF8.GetBytes(message);
+            client.Send(data, data.Length, serverEP);
 
-            string? response = await reader.ReadLineAsync();
-            Console.WriteLine("Server: " + response);
+            IPEndPoint remoteEP = null;
+            byte[] responseData = client.Receive(ref remoteEP);
+            string response = Encoding.UTF8.GetString(responseData);
+
+            Console.WriteLine(response);
+            Console.WriteLine();
         }
 
-        Console.WriteLine("Disconnected.");
+        client.Close();
     }
 }
