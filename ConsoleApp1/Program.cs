@@ -1,33 +1,31 @@
 ﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
+using System.Threading.Tasks;
 
 class Program
 {
-    static void Main()
+    static async Task Main()
     {
-        UdpClient client = new UdpClient();
-        IPEndPoint serverEP = new IPEndPoint(IPAddress.Loopback, 8888);
+        MovieService movieService = new MovieService();
 
-        Console.WriteLine("Введите название комплектующей (или 'exit' для выхода):");
+        Console.WriteLine("Enter film name (или 'exit' для выхода):");
 
         while (true)
         {
-            string message = Console.ReadLine();
-            if (message.ToLower() == "exit") break;
+            Console.Write("> ");
+            string title = Console.ReadLine();
 
-            byte[] data = Encoding.UTF8.GetBytes(message);
-            client.Send(data, data.Length, serverEP);
+            if (title == "exit") break;
 
-            IPEndPoint remoteEP = null;
-            byte[] responseData = client.Receive(ref remoteEP);
-            string response = Encoding.UTF8.GetString(responseData);
+            var movie = await movieService.GetMovieAsync(title);
 
-            Console.WriteLine(response);
-            Console.WriteLine();
+            if (movie != null)
+            {
+                Console.WriteLine("\nFilm info:");
+                Console.WriteLine($"Name: {movie.Title}");
+                Console.WriteLine($"Exits date: {movie.ReleaseDate}");
+                Console.WriteLine($"Rate: {movie.VoteAverage}");
+                Console.WriteLine($"Desc: {movie.Overview}\n");
+            }
         }
-
-        client.Close();
     }
 }
