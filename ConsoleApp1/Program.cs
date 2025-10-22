@@ -1,31 +1,43 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using MailKit.Net.Pop3;
+using System.Net;
+using System.Net.Mail;
 
 class Program
 {
-    static async Task Main()
+    static void Main(string[] args)
     {
-        MovieService movieService = new MovieService();
+        Console.Write("Введите ваш email: ");
+        string fromEmail = Console.ReadLine();
 
-        Console.WriteLine("Enter film name (или 'exit' для выхода):");
+        Console.Write("Введите пароль: ");
+        string password = Console.ReadLine();
 
-        while (true)
+        Console.Write("Введите тему письма: ");
+        string subject = Console.ReadLine();
+
+        Console.Write("Введите текст письма: ");
+        string body = Console.ReadLine();
+
+        Console.Write("Введите email получателей через запятую: ");
+        string recipientsInput = Console.ReadLine();
+        string[] recipients = recipientsInput.Split(',');
+
+        MailMessage mail = new MailMessage();
+        mail.From = new MailAddress(fromEmail);
+        foreach (string recipient in recipients)
         {
-            Console.Write("> ");
-            string title = Console.ReadLine();
-
-            if (title == "exit") break;
-
-            var movie = await movieService.GetMovieAsync(title);
-
-            if (movie != null)
-            {
-                Console.WriteLine("\nFilm info:");
-                Console.WriteLine($"Name: {movie.Title}");
-                Console.WriteLine($"Exits date: {movie.ReleaseDate}");
-                Console.WriteLine($"Rate: {movie.VoteAverage}");
-                Console.WriteLine($"Desc: {movie.Overview}\n");
-            }
+            mail.To.Add(recipient.Trim());
         }
+        mail.Subject = subject;
+        mail.Body = body;
+
+        SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
+        smtp.Credentials = new NetworkCredential(fromEmail, password);
+        smtp.EnableSsl = true;
+
+        smtp.Send(mail);
+        Console.WriteLine("Письмо отправленно");
+
+        Console.ReadKey();
     }
 }
